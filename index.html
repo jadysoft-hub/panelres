@@ -155,7 +155,7 @@ const mk=(c,o,n)=>jb(c,'POST','',o,{'X-Bin-Private':'true','X-Bin-Name':n}).then
 // ===== AYARLAR =====
 const KEY='$2a$10$Vm6HUhvS3XsqMvY6BtGJOe6ZIQpzynWm9LoZGhf2jvcZSxr9tEyTq'; // JSONBin Master Key
 const KT='M';        // 'M' = Master Key, 'A' = Access Key
-const BIN_ID='';     // İlk kurulumda ekranda çıkan Bin ID'yi buraya yapıştırın
+const BIN_ID='6adbe138ffd5d16053871a0b';     // İlk kurulumda ekranda çıkan Bin ID'yi buraya yapıştırın
 const CF={k:KEY,kt:KT,m:BIN_ID};
 let ses=JSON.parse(localStorage.kts||'null'),role='admin',main=null,CC=null;
 if(ses&&ses.role=='courier')CC={k:KEY,kt:KT,m:BIN_ID,id:ses.id,b:ses.b};
