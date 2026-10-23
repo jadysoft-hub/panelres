@@ -88,6 +88,7 @@ small{color:#5a6b61}
  <p id="info" style="margin:6px 0;color:#5a6b61"></p>
  <input id="pin" type="password" inputmode="numeric" placeholder="PIN">
  <button class="btn w" id="go">Giriş</button><p id="lm" style="color:#b42318;margin-top:8px"></p>
+ <small id="ver" style="display:block;margin-top:16px;opacity:.6"></small>
 </div></div>
 
 <!-- YÖNETİCİ -->
@@ -155,7 +156,7 @@ const mk=(c,o,n)=>jb(c,'POST','',o,{'X-Bin-Private':'true','X-Bin-Name':n}).then
 // ===== AYARLAR =====
 const KEY='$2a$10$Vm6HUhvS3XsqMvY6BtGJOe6ZIQpzynWm9LoZGhf2jvcZSxr9tEyTq'; // JSONBin Master Key
 const KT='M';        // 'M' = Master Key, 'A' = Access Key
-const BIN_ID='6adbe138ffd5d16053871a0b';     // İlk kurulumda ekranda çıkan Bin ID'yi buraya yapıştırın
+const BIN_ID='6adbe3b5ffd5d16053871e90';     // İlk kurulumda ekranda çıkan Bin ID'yi buraya yapıştırın
 const CF={k:KEY,kt:KT,m:BIN_ID};
 let ses=JSON.parse(localStorage.kts||'null'),role='admin',main=null,CC=null;
 if(ses&&ses.role=='courier')CC={k:KEY,kt:KT,m:BIN_ID,id:ses.id,b:ses.b};
@@ -179,7 +180,7 @@ function setRole(r){
  $('info').textContent=!BIN_ID?'İlk kurulum: yeni bir yönetici PIN\'i belirleyin (en az 4 hane).':r=='admin'?'Yönetici PIN\'inizi girin.':'Kurye kodunuzu ve PIN\'inizi girin.';
  $('lt').textContent=r=='admin'?'Restoran girişi':'Kurye girişi';
 }
-$('go').onclick=login;$('pin').addEventListener('keydown',e=>{if(e.key=='Enter')login()});
+$('ver').textContent='sürüm 2 · bin '+(BIN_ID?BIN_ID.slice(0,6)+'…':'YOK');$('go').onclick=login;$('pin').addEventListener('keydown',e=>{if(e.key=='Enter')login()});
 async function login(){
  const p=$('pin').value.trim();$('lm').textContent='';
  if(p.length<4)return $('lm').textContent='PIN en az 4 hane olmalı';
