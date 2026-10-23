@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b8a4b">
+<title>Kurye Takip</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--g:#1b8a4b;--gd:#146b39;--gl:#e8f5ee;--t:#1c2b22}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{font:14px system-ui,sans-serif;color:var(--t);height:100dvh;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+header{background:var(--g);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;gap:8px}
+header button{background:#fff2;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-weight:600}
+.app{flex:1;min-height:0;display:flex;flex-direction:column}
+.mapbox{flex:1;min-height:30vh;position:relative}
+.mapbox>div:first-child{position:absolute;inset:0}
+.fb{position:absolute;right:10px;bottom:14px;z-index:999;box-shadow:0 2px 8px #0004;width:auto!important}
+.side{height:52%;overflow:auto;border-top:3px solid var(--g)}
+@media(min-width:900px){.app{flex-direction:row-reverse}.side{width:430px;height:auto;border-top:0;border-right:3px solid var(--g);flex:none}}
+.tabs{display:flex;position:sticky;top:0;z-index:5}
+.tabs button{flex:1;padding:11px;border:0;background:var(--gl);font:600 14px system-ui;color:var(--gd)}
+.tabs .on{background:var(--g);color:#fff}
+.card,.form{margin:8px;padding:10px;border:1px solid #cfe6d8;border-radius:10px}
+.form{background:var(--gl)}
+.card.next{border:2px solid var(--g);background:var(--gl)}
+input,select{width:100%;padding:11px;margin:3px 0;border:1px solid #b9d6c5;border-radius:8px;font:inherit;background:#fff}
+.btn{display:block;background:var(--g);color:#fff;border:0;border-radius:8px;padding:10px 12px;font-weight:600;margin-top:5px;text-align:center;text-decoration:none;font-size:14px}
+.btn.w{width:100%}.btn.o{background:#fff;color:var(--g);border:2px solid var(--g)}.red{background:#b42318}
+.row{display:flex;gap:6px;flex-wrap:wrap}.row .btn{flex:1}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--gl);color:var(--gd);font-weight:600}
+.card.next .tag.n{background:var(--g);color:#fff}
+#sg div{padding:10px;background:#fff;border:1px solid #cfe6d8;border-top:0;cursor:pointer}
+small{color:#5a6b61}
+.wn{background:#fff3cd;color:#664d03;padding:8px 14px;font-size:13px}
+#lg{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;background:linear-gradient(#e8f5ee,#fff);overflow:auto}
+#lg .box{width:100%;max-width:360px;text-align:center}
+#lg h2{color:var(--g);margin-bottom:4px;font-size:24px}
+.seg{display:flex;margin:14px 0 8px;border:2px solid var(--g);border-radius:10px;overflow:hidden}
+.seg button{flex:1;padding:10px;border:0;background:#fff;color:var(--g);font:600 14px system-ui}.seg .on{background:var(--g);color:#fff}
+#ld{position:fixed;inset:0;z-index:5000;background:linear-gradient(#bfe8cf,#f3fbf6 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+#ld .stage{position:relative;width:min(92vw,520px);height:210px;overflow:hidden;border-radius:18px;background:linear-gradient(#d6f2e1,#fff)}
+.city{position:absolute;left:0;bottom:46px;width:200%;height:70px;background:
+ linear-gradient(#9fd3b5,#9fd3b5) 0 100%/38px 40px no-repeat,linear-gradient(#8cc7a4,#8cc7a4) 60px 100%/30px 62px no-repeat,
+ linear-gradient(#9fd3b5,#9fd3b5) 120px 100%/44px 34px no-repeat,linear-gradient(#8cc7a4,#8cc7a4) 190px 100%/28px 56px no-repeat;
+ background-repeat:repeat-x;background-size:240px 70px;animation:cm 4s linear infinite}
+.road{position:absolute;left:0;right:0;bottom:0;height:46px;background:#4b5b52}
+.road:after{content:"";position:absolute;left:0;right:0;top:21px;height:4px;background:repeating-linear-gradient(90deg,#fff 0 24px,transparent 24px 48px);animation:rd .45s linear infinite}
+#sc{position:absolute;left:50%;bottom:18px;width:210px;margin-left:-105px}
+.bob{animation:bob .35s ease-in-out infinite alternate}
+.wh{transform-box:fill-box;transform-origin:center;animation:sp .45s linear infinite}
+.sp{animation:sl .5s linear infinite}
+@keyframes cm{to{transform:translateX(-240px)}}@keyframes rd{to{transform:translateX(-48px)}}
+@keyframes bob{to{transform:translateY(-3px) rotate(-1deg)}}@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes sl{from{transform:translateX(12px);opacity:0}30%{opacity:1}to{transform:translateX(-18px);opacity:0}}
+#ld .pb{width:min(70vw,300px);height:10px;border-radius:9px;background:#cfe6d8;margin-top:20px;overflow:hidden}
+#ld .pb i{display:block;height:100%;width:0;background:var(--g);animation:pb 2.6s ease-in-out forwards}@keyframes pb{to{width:100%}}
+#ld h3{margin-top:16px;color:var(--gd)}
+</style></head><body>
+
+<div id="ld">
+ <div class="stage"><div class="city"></div><div class="road"></div>
+  <svg id="sc" viewBox="0 0 240 130">
+   <g class="sp"><path d="M10 50h26M0 66h30M14 82h22" stroke="#8cc7a4" stroke-width="4" stroke-linecap="round"/></g>
+   <g class="bob">
+    <rect x="30" y="30" width="46" height="38" rx="7" fill="#1b8a4b"/><rect x="30" y="30" width="46" height="10" rx="5" fill="#146b39"/>
+    <text x="53" y="60" font-size="18" text-anchor="middle">🍔</text>
+    <path d="M78 88h70l14-28h14" fill="none" stroke="#146b39" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="170" y="44" width="7" height="16" rx="3" fill="#146b39"/>
+    <rect x="84" y="46" width="28" height="40" rx="11" fill="#fff" stroke="#1b8a4b" stroke-width="3"/>
+    <path d="M104 58l46 4" stroke="#ffd9b0" stroke-width="8" stroke-linecap="round"/>
+    <path d="M96 84l20 10h20" stroke="#2b3a31" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="98" cy="30" r="16" fill="#ffd9b0"/><path d="M82 30a16 16 0 0 1 32 0z" fill="#1b8a4b"/><rect x="104" y="27" width="14" height="6" rx="3" fill="#146b39"/>
+    <circle cx="104" cy="37" r="2.2" fill="#222"/><path d="M100 42q5 4 10 0" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+   </g>
+   <g class="wh"><circle cx="86" cy="108" r="18" fill="#2b3a31"/><circle cx="86" cy="108" r="9" fill="#cfd8d3"/><path d="M86 99v18M77 108h18" stroke="#2b3a31" stroke-width="3"/></g>
+   <g class="wh"><circle cx="166" cy="108" r="18" fill="#2b3a31"/><circle cx="166" cy="108" r="9" fill="#cfd8d3"/><path d="M166 99v18M157 108h18" stroke="#2b3a31" stroke-width="3"/></g>
+  </svg></div>
+ <div class="pb"><i></i></div><h3>Kurye yola çıkıyor…</h3>
+</div>
+
+<div id="lg" hidden><div class="box">
+ <h2>🛵 Kurye Takip</h2><small id="lt">Giriş yapın</small>
+ <div class="seg"><button id="rA" class="on" onclick="setRole('admin')">Restoran</button><button id="rC" onclick="setRole('courier')">Kurye</button></div>
+ <div id="setup" hidden>
+  <input id="kod" placeholder="Kurye kodu" autocapitalize="none" autocomplete="off">
+ </div>
+ <p id="info" style="margin:6px 0;color:#5a6b61"></p>
+ <input id="pin" type="password" inputmode="numeric" placeholder="PIN">
+ <button class="btn w" id="go">Giriş</button><p id="lm" style="color:#b42318;margin-top:8px"></p>
+</div></div>
+
+<!-- YÖNETİCİ -->
+<div id="A" style="display:none;flex-direction:column;flex:1;min-height:0">
+ <header><span>🛵 Restoran</span><span id="ahd"></span><span><button onclick="info()">⚙</button> <button onclick="logout()">Çıkış</button></span></header>
+ <div class="wn" id="aw" hidden></div>
+ <div class="app">
+  <div class="mapbox"><div id="amap"></div><button class="btn fb" id="afb" hidden onclick="fit(1)">🎯 Hepsini göster</button></div>
+  <div class="side">
+   <div class="tabs"><button id="to" class="on" onclick="tab('o')">Siparişler</button><button id="tc" onclick="tab('c')">Kuryeler</button></div>
+   <div class="form" id="oform">
+    <input id="addr" placeholder="Adres yazın (sokak, mahalle, işyeri…)" autocomplete="off"><div id="sg"></div>
+    <input id="ph" placeholder="Telefon" type="tel"><input id="nt" placeholder="Not (opsiyonel)">
+    <button class="btn w" onclick="addOrder()">➕ Sipariş ekle</button>
+    <small id="pt">Listeden seçin ya da haritaya dokunarak işaretleyin</small>
+   </div>
+   <div class="form" id="cform" hidden>
+    <input id="cn" placeholder="Kurye adı"><input id="cpn" placeholder="Kurye PIN (en az 4 rakam)" inputmode="numeric">
+    <button class="btn w" onclick="addC()">➕ Kurye ekle</button>
+   </div>
+   <div id="alist"></div>
+  </div>
+ </div>
+</div>
+
+<!-- KURYE -->
+<div id="C" style="display:none;flex-direction:column;flex:1;min-height:0">
+ <header><span id="cnm">🛵</span><span id="cst">…</span><button onclick="logout()">Çıkış</button></header>
+ <div class="wn" id="warn" hidden></div>
+ <div class="app">
+  <div class="mapbox" style="flex:none;height:38vh"><div id="cmap"></div><button class="btn fb" id="cfb" hidden onclick="cfit(1)">🎯</button></div>
+  <div class="side" style="flex:1;height:auto"><div id="clist"></div></div>
+ </div>
+</div>
+
+<script>
+// ===== Ayarlar (JSONBin istek sayısını doğrudan etkiler) =====
+const ADMIN_POLL=10000;     // yönetici ekranı yenileme (ms)
+const SEND_MOVING=15000;    // kurye hareket halindeyken konum gönderme aralığı
+const SEND_IDLE=60000;      // kurye duruyorsa en az bu aralıkla "buradayım" gönder
+const ORD_EVERY=30000;      // kuryenin yeni sipariş kontrolü
+const ONLINE_MS=150000;     // bu süre içinde konum geldiyse çevrimiçi say
+
+const $=i=>document.getElementById(i),E=s=>String(s??'').replace(/[&<>"']/g,m=>'&#'+m.charCodeAt(0)+';');
+const hav=(a,b,c,d)=>{const r=x=>x*Math.PI/180,h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 12742*Math.asin(Math.sqrt(h))};
+const ico=(h,c)=>L.divIcon({className:'',html:`<div style="background:${c};border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px #0006;font-size:17px">${h}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
+const tile=m=>L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(m);
+const H=async(s,salt)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('kt:'+salt+':'+s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+const isId=s=>/^[a-f0-9]{24}$/i.test(s||'');
+const R={new:0,assigned:1,picked:2,done:3};
+
+// ===== JSONBin istemcisi =====
+const JB='https://api.jsonbin.io/v3/b';let REQ=0;
+async function jb(c,method,id,body,extra){
+ REQ++;const rq=$('ahd');
+ const h={'Content-Type':'application/json',[c.kt=='M'?'X-Master-Key':'X-Access-Key']:c.k,...extra};
+ const r=await fetch(JB+(id?'/'+id+(method=='GET'?'/latest':''):''),{method,headers:h,body:body?JSON.stringify(body):undefined});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(j.message||('HTTP '+r.status));return j;
+}
+const rd=(c,id)=>jb(c,'GET',id).then(j=>j.record);
+const wr=(c,id,o)=>jb(c,'PUT',id,o);
+const mk=(c,o,n)=>jb(c,'POST','',o,{'X-Bin-Private':'true','X-Bin-Name':n}).then(j=>j.metadata.id);
+
+// ===== AYARLAR =====
+const KEY='$2a$10$Vm6HUhvS3XsqMvY6BtGJOe6ZIQpzynWm9LoZGhf2jvcZSxr9tEyTq'; // JSONBin Master Key
+const KT='M';        // 'M' = Master Key, 'A' = Access Key
+const BIN_ID='';     // İlk kurulumda ekranda çıkan Bin ID'yi buraya yapıştırın
+const CF={k:KEY,kt:KT,m:BIN_ID};
+let ses=JSON.parse(localStorage.kts||'null'),role='admin',main=null,CC=null;
+if(ses&&ses.role=='courier')CC={k:KEY,kt:KT,m:BIN_ID,id:ses.id,b:ses.b};
+const save=()=>localStorage.kts=JSON.stringify(ses);
+
+// ===== Açılış =====
+(async()=>{
+ const t0=Date.now();let ok=false;
+ if(ses){try{
+  if(!BIN_ID){}
+  else if(ses.role=='admin'){main=await rd(CF,CF.m);ok=main.admin==ses.ph}
+  else if(ses.role=='courier'&&CC){const m=await rd(CC,CC.m),c=m.couriers.find(x=>x.id==CC.id);ok=!!c&&c.h==ses.ph}
+ }catch(e){}}
+ await new Promise(r=>setTimeout(r,Math.max(0,2600-(Date.now()-t0))));
+ $('ld').style.opacity=0;setTimeout(()=>$('ld').remove(),500);
+ if(ok)start();else{ses=null;localStorage.removeItem('kts');$('lg').hidden=false;setRole('admin')}
+})();
+function setRole(r){
+ role=r;$('rA').className=r=='admin'?'on':'';$('rC').className=r=='courier'?'on':'';$('lm').textContent='';
+ $('setup').hidden=r!='courier';
+ $('info').textContent=!BIN_ID?'İlk kurulum: yeni bir yönetici PIN\'i belirleyin (en az 4 hane).':r=='admin'?'Yönetici PIN\'inizi girin.':'Kurye kodunuzu ve PIN\'inizi girin.';
+ $('lt').textContent=r=='admin'?'Restoran girişi':'Kurye girişi';
+}
+$('go').onclick=login;$('pin').addEventListener('keydown',e=>{if(e.key=='Enter')login()});
+async function login(){
+ const p=$('pin').value.trim();$('lm').textContent='';
+ if(p.length<4)return $('lm').textContent='PIN en az 4 hane olmalı';
+ $('go').disabled=true;
+ try{
+  if(!BIN_ID){
+   if(role!='admin')return $('lm').textContent='Önce yönetici kurulumu yapılmalı';
+   const m=await mk(CF,{v:1,admin:'',n:0,couriers:[],orders:[]},'kurye-ana');
+   await wr(CF,m,{v:1,admin:await H(p,m),n:0,couriers:[],orders:[]});
+   $('lm').style.color='#146b39';
+   $('lm').innerHTML='✅ Kurulum tamam. Bin ID:<br><b style="user-select:all;word-break:break-all">'+m+'</b><br>Bunu panelim.html içindeki <b>BIN_ID</b> satırına yapıştırıp GitHub\'a yükleyin.';
+   return;
+  }
+  if(role=='admin'){
+   const m=await rd(CF,CF.m),h=await H(p,CF.m);
+   if(m.admin!=h){await new Promise(r=>setTimeout(r,600));return $('lm').textContent='PIN hatalı'}
+   ses={role:'admin',ph:h};
+  }else{
+   const id=$('kod').value.trim().toLowerCase();
+   if(!/^[a-z0-9]{3,8}$/.test(id))return $('lm').textContent='Kurye kodunu girin';
+   const m=await rd(CF,CF.m),c=m.couriers.find(x=>x.id==id),h=await H(p,CF.m+id);
+   if(!c||c.h!=h){await new Promise(r=>setTimeout(r,600));return $('lm').textContent='Kod veya PIN hatalı'}
+   ses={role:'courier',ph:h,id,b:c.b,name:c.n};CC={k:KEY,kt:KT,m:BIN_ID,id,b:c.b};
+  }
+  save();start();
+ }catch(e){$('lm').textContent='Hata: '+e.message}
+ finally{$('go').disabled=false}
+}
+function logout(){localStorage.removeItem('kts');location.reload()}
+function start(){$('lg').hidden=true;const el=$(ses.role=='admin'?'A':'C');el.style.display='flex';ses.role=='admin'?initA():initC()}
+function info(){alert(`Bin ID: ${CF.m}\nBu cihazda yapılan JSONBin isteği: ${REQ}`)}
+
+// ===================== YÖNETİCİ =====================
+let S={couriers:[],orders:[]},T='o',pt=null,pm=null,follow=true,lastH='',sgl=[],tm,amap,doneOld=new Set();
+const SN={new:'Bekliyor',assigned:'Atandı',picked:'Yolda'};
+const online=c=>c.t&&Date.now()-c.t<ONLINE_MS,act=o=>o.s!='done',cnt=id=>S.orders.filter(o=>o.c==id&&act(o)).length;
+const ago=t=>{if(!t)return'hiç';const s=Math.round((Date.now()-t)/1000);return s<60?s+' sn önce':s<3600?Math.round(s/60)+' dk önce':Math.round(s/3600)+' sa önce'};
+const astop=()=>{follow=false;$('afb').hidden=false};
+function initA(){
+ amap=L.map('amap').setView([39,35],6);tile(amap);
+ amap.on('dragstart',astop);amap.getContainer().addEventListener('wheel',astop);
+ amap.getContainer().addEventListener('touchstart',e=>{if(e.touches.length>1)astop()});
+ amap.on('click',e=>{if(T=='o')setPt([e.latlng.lat,e.latlng.lng])});
+ $('addr').addEventListener('input',()=>{clearTimeout(tm);pt=null;tm=setTimeout(suggest,350)});
+ $('addr').addEventListener('keydown',e=>{if(e.key=='Enter'&&sgl[0])pick(0)});
+ poll();setInterval(poll,ADMIN_POLL);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
+}
+async function poll(){
+ if(document.hidden)return;
+ try{
+  main=await rd(CF,CF.m);
+  const bins=await Promise.all(main.couriers.map(c=>rd(CF,c.b).catch(()=>({}))));
+  const cs=main.couriers.map((c,i)=>({id:c.id,n:c.n,b:c.b,lat:bins[i].lat,lng:bins[i].lng,t:bins[i].t||0,st:bins[i].st||{}}));
+  doneOld=new Set();
+  const os=main.orders.map(o=>{
+   const c=cs.find(x=>x.id==o.c),st=c&&c.st[o.id];let s=o.s;
+   if(st&&R[st.s]>R[s]){s=st.s;if(s=='done'&&Date.now()-st.t>432e5)doneOld.add(o.id)}
+   if(o.s=='done'&&Date.now()-(o.dt||0)>864e5)doneOld.add(o.id);
+   return{...o,s}});
+  S={couriers:cs,orders:os};$('aw').hidden=true;draw();list();
+ }catch(e){$('aw').hidden=false;$('aw').textContent='⚠ JSONBin hatası: '+e.message+' (istek limiti dolmuş olabilir)'}
+}
+async function mut(fn){
+ try{const m=await rd(CF,CF.m);await fn(m);m.orders=m.orders.filter(o=>!doneOld.has(o.id));await wr(CF,CF.m,m);main=m;await poll()}
+ catch(e){alert('Kaydedilemedi: '+e.message)}
+}
+const cm={},om={};
+function draw(){
+ const os=S.orders.filter(o=>act(o)&&o.lat);
+ Object.keys(cm).forEach(k=>{if(!S.couriers.find(c=>c.id==k&&c.lat)){amap.removeLayer(cm[k]);delete cm[k]}});
+ S.couriers.forEach(c=>{if(!c.lat)return;const ic=ico('🛵',online(c)?'#1b8a4b':'#8a8a8a');
+  if(!cm[c.id])cm[c.id]=L.marker([c.lat,c.lng],{icon:ic}).addTo(amap);else cm[c.id].setLatLng([c.lat,c.lng]).setIcon(ic);
+  cm[c.id].unbindTooltip().bindTooltip(`${c.n} (${cnt(c.id)})`,{permanent:true,direction:'top',offset:[0,-16]})});
+ Object.keys(om).forEach(k=>{if(!os.find(o=>o.id==k)){amap.removeLayer(om[k]);delete om[k]}});
+ os.forEach(o=>{if(!om[o.id])om[o.id]=L.marker([o.lat,o.lng],{icon:ico('📦','#f59e0b')}).addTo(amap);
+  om[o.id].unbindTooltip().bindTooltip('#'+o.id,{direction:'top',offset:[0,-16]})});
+ $('ahd').textContent=`📦 ${S.orders.filter(act).length} · 🟢 ${S.couriers.filter(online).length}/${S.couriers.length}`;
+ if(follow)fit();
+}
+function fit(f){
+ if(f){follow=true;$('afb').hidden=true}
+ const p=[...S.couriers.filter(c=>c.lat&&online(c)).map(c=>[c.lat,c.lng]),...S.orders.filter(o=>act(o)&&o.lat).map(o=>[o.lat,o.lng])];
+ if(!p.length)return;
+ if(p.length==1)amap.setView(p[0],16);else amap.fitBounds(L.latLngBounds(p).pad(.25),{maxZoom:16});
+}
+function eta(o){const c=S.couriers.find(x=>x.id==o.c);if(!c||!c.lat||!o.lat)return'';const km=hav(c.lat,c.lng,o.lat,o.lng);return `⏱ ~${Math.max(1,Math.round(km/25*60))} dk · ${km.toFixed(1)} km`}
+function list(){
+ const h=JSON.stringify([T,S.couriers.map(c=>({...c,t:online(c)?1:ago(c.t)})),S.orders]);if(h==lastH)return;
+ if(document.activeElement&&document.activeElement.tagName=='SELECT')return;
+ lastH=h;let o='';
+ if(T=='o'){
+  const opts=c=>S.couriers.map(k=>`<option value="${k.id}" ${c==k.id?'selected':''}>${E(k.n)} (${cnt(k.id)})</option>`).join('');
+  S.orders.filter(act).forEach(x=>{
+   o+=`<div class="card"><b>#${x.id}</b> <span class="tag">${SN[x.s]}</span> <small>${eta(x)}</small><br>${E(x.addr)}<br><small>${E(x.ph)} ${E(x.note)}</small>
+   <select onchange="asg(${x.id},this.value)"><option value="">Kurye seç…</option>${opts(x.c)}</select>
+   <div class="row">${x.lat?`<button class="btn" onclick="astop();amap.setView([${x.lat},${x.lng}],17)">Haritada</button>`:''}
+   <button class="btn" onclick="mut(m=>{const o=m.orders.find(z=>z.id==${x.id});o.s='done';o.dt=Date.now()})">Teslim edildi</button>
+   <button class="btn red" onclick="confirm('Silinsin mi?')&&mut(m=>{m.orders=m.orders.filter(z=>z.id!=${x.id})})">Sil</button></div></div>`});
+  if(!o)o='<p style="margin:14px;color:#5a6b61">Aktif sipariş yok.</p>';
+ }else{
+  S.couriers.forEach(c=>{
+   o+=`<div class="card"><b>${E(c.n)}</b> <span class="tag">${online(c)?'🟢 Çevrimiçi':'⚪ Çevrimdışı'}</span><br>
+   <small>Kod: <b>${c.id}</b> · Aktif sipariş: ${cnt(c.id)} · Son konum: ${ago(c.t)}</small>
+   <div class="row">${c.lat?`<button class="btn" onclick="astop();amap.setView([${c.lat},${c.lng}],17)">Haritada</button>`:''}
+   <button class="btn red" onclick="confirm('Kurye silinsin mi?')&&mut(m=>{m.couriers=m.couriers.filter(z=>z.id!='${c.id}');m.orders.forEach(z=>{if(z.c=='${c.id}'&&z.s!='done'){z.c=null;z.s='new'}})})">Sil</button></div></div>`});
+  if(!o)o='<p style="margin:14px;color:#5a6b61">Henüz kurye yok. Yukarıdan ekleyin.</p>';
+ }
+ $('alist').innerHTML=o;
+}
+function tab(t){T=t;lastH='';$('to').className=t=='o'?'on':'';$('tc').className=t=='c'?'on':'';$('oform').hidden=t!='o';$('cform').hidden=t!='c';list()}
+const asg=(id,c)=>mut(m=>{const o=m.orders.find(z=>z.id==id);o.c=c||null;o.s=c?'assigned':'new'});
+async function addC(){
+ const n=$('cn').value.trim(),p=$('cpn').value.trim();
+ if(!n)return;if(p.length<4)return alert('PIN en az 4 rakam olmalı');
+ const id=Math.random().toString(36).slice(2,6);
+ try{
+  const b=await mk(CF,{lat:null,lng:null,t:0,st:{}},'kurye-'+id);
+  await mut(async m=>{m.couriers.push({id,n:n.slice(0,40),h:await H(p,CF.m+id),b})});
+  $('cn').value=$('cpn').value='';
+  alert(`Kurye eklendi: ${n}\n\nKod: ${id}\nPIN: ${p}\n\nBu bilgileri kuryeye iletin. PIN daha sonra görüntülenemez.`);
+ }catch(e){alert('Hata: '+e.message)}
+}
+const lbl=p=>[p.name,[p.street,p.housenumber].filter(Boolean).join(' '),p.district||p.locality,p.city,p.state].filter((x,i,a)=>x&&a.indexOf(x)==i).join(', ');
+async function suggest(){
+ const q=$('addr').value.trim();if(q.length<3){$('sg').innerHTML='';sgl=[];return}
+ const c=amap.getCenter();
+ try{
+  const r=await(await fetch(`https://photon.komoot.io/api/?limit=6&lat=${c.lat}&lon=${c.lng}&q=${encodeURIComponent(q)}`)).json();
+  sgl=r.features.map(f=>({t:lbl(f.properties),ll:[f.geometry.coordinates[1],f.geometry.coordinates[0]]})).filter(x=>x.t);
+  $('sg').innerHTML=sgl.map((s,i)=>`<div onclick="pick(${i})">📍 ${E(s.t)}</div>`).join('');
+ }catch(e){}
+}
+function setPt(ll){pt=ll;if(pm)pm.setLatLng(ll);else pm=L.marker(ll).addTo(amap);$('pt').textContent='📍 Konum seçildi'}
+function pick(i){const s=sgl[i];$('addr').value=s.t;$('sg').innerHTML='';setPt(s.ll);astop();amap.setView(s.ll,17)}
+async function addOrder(){
+ const a=$('addr').value.trim();if(!a)return alert('Adres girin');
+ if(!pt&&sgl[0])setPt(sgl[0].ll);
+ const d={addr:a.slice(0,120),ph:$('ph').value.slice(0,30),note:$('nt').value.slice(0,120),lat:pt?pt[0]:null,lng:pt?pt[1]:null};
+ await mut(m=>{m.n=(m.n||0)+1;m.orders.push({id:m.n,...d,s:'new',c:null,ts:Date.now(),dt:0})});
+ ['addr','ph','nt'].forEach(i=>$(i).value='');$('sg').innerHTML='';sgl=[];
+ if(pm){amap.removeLayer(pm);pm=null}pt=null;$('pt').textContent='Listeden seçin ya da haritaya dokunarak işaretleyin';
+}
+
+// ===================== KURYE =====================
+let pos=null,lastPos=null,lastSent=0,lastOrd=0,n0=0,cfollow=true,cmap,me,lay,wl,first=1,corders=[],ac,CB={lat:null,lng:null,t:0,st:{}};
+const cstop=()=>{cfollow=false;$('cfb').hidden=false};
+async function initC(){
+ $('cnm').textContent='🛵 '+(ses.name||'Kurye');
+ cmap=L.map('cmap').setView([39,35],6);lay=L.layerGroup().addTo(cmap);tile(cmap);
+ cmap.on('dragstart',cstop);cmap.getContainer().addEventListener('wheel',cstop);
+ cmap.getContainer().addEventListener('touchstart',e=>{if(e.touches.length>1)cstop()});
+ try{const b=await rd(CC,CC.b);CB={lat:null,lng:null,t:0,st:{},...b}}catch(e){}
+ if(navigator.geolocation)navigator.geolocation.watchPosition(p=>{
+  pos=[p.coords.latitude,p.coords.longitude];
+  if(!me)me=L.marker(pos,{icon:ico('🛵','#1b8a4b')}).addTo(cmap);else me.setLatLng(pos);
+  if(first){first=0;send(true)}cfit();
+ },()=>$('cst').textContent='⚠ Konum izni gerekli',{enableHighAccuracy:true,maximumAge:3000,timeout:20000});
+ else $('cst').textContent='⚠ Konum desteklenmiyor';
+ keepAwake();keepAlive();heartbeat();ctick(true);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible'){keepAwake();ctick(true)}});
+}
+async function send(force){
+ if(!pos)return;const now=Date.now(),moved=lastPos?hav(lastPos[0],lastPos[1],pos[0],pos[1])*1000:999;
+ if(!(force||(moved>15&&now-lastSent>=SEND_MOVING)||now-lastSent>=SEND_IDLE))return;
+ lastSent=now;lastPos=pos;CB.lat=pos[0];CB.lng=pos[1];CB.t=now;
+ try{await wr(CC,CC.b,CB);$('cst').textContent='📡 '+new Date().toLocaleTimeString('tr-TR')}
+ catch(e){$('cst').textContent='⚠ '+e.message.slice(0,30);lastSent=now-SEND_MOVING+5000}
+}
+function cfit(f){
+ if(f){cfollow=true;$('cfb').hidden=true}
+ if(!cfollow||!pos)return;
+ const n=corders.find(o=>o.lat);
+ if(n)cmap.fitBounds(L.latLngBounds([pos,[n.lat,n.lng]]).pad(.35),{maxZoom:17});else cmap.setView(pos,16);
+}
+async function ctick(force){
+ send();
+ if(!force&&Date.now()-lastOrd<ORD_EVERY)return;
+ lastOrd=Date.now();
+ try{
+  const m=await rd(CC,CC.m);
+  if(!m.couriers.find(c=>c.id==CC.id))return logout();
+  const ids=new Set(m.orders.map(o=>String(o.id)));let pr=false;
+  Object.keys(CB.st).forEach(k=>{if(!ids.has(k)){delete CB.st[k];pr=true}});if(pr)send(true);
+  corders=m.orders.filter(o=>o.c==CC.id).map(o=>{const st=CB.st[o.id];return st&&R[st.s]>R[o.s]?{...o,s:st.s}:o}).filter(o=>o.s!='done').sort((a,b)=>a.id-b.id);
+  render();
+ }catch(e){$('cst').textContent='⚠ '+e.message.slice(0,30)}
+}
+function render(){
+ if(corders.length>n0&&navigator.vibrate)navigator.vibrate([300,150,300]);
+ n0=corders.length;lay.clearLayers();
+ corders.forEach(o=>{if(o.lat)L.marker([o.lat,o.lng],{icon:ico('📦','#f59e0b')}).addTo(lay)});
+ cfit();
+ $('clist').innerHTML=corders.length?corders.map((o,i)=>{
+  const km=pos&&o.lat?hav(pos[0],pos[1],o.lat,o.lng):null;
+  return `<div class="card ${i==0?'next':''}">${i==0?'<span class="tag n">SIRADAKİ</span> ':''}<b>#${o.id}</b> ${o.s=='picked'?'· Yolda':''}<br>
+  ${E(o.addr)}<br><small>${E(o.ph)} ${E(o.note)}${km!=null?` · ${km.toFixed(1)} km`:''}</small>
+  ${o.s=='assigned'?`<button class="btn w" onclick="cst2(${o.id},'picked')">📦 Siparişi Aldım</button>`:`<button class="btn w" onclick="cst2(${o.id},'done')">✅ Teslim Ettim</button>`}
+  <div class="row">${o.lat?`<a class="btn o" href="https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lng}">🧭 Yol Tarifi</a>`:''}
+  ${o.ph?`<a class="btn o" href="tel:${E(o.ph)}">📞 Ara</a>`:''}</div></div>`}).join(''):'<p style="margin:16px;color:#5a6b61">Şu an atanmış sipariş yok. Uygulamayı açık bırakın.</p>';
+}
+async function cst2(id,s){
+ CB.st[id]={s,t:Date.now()};
+ const o=corders.find(x=>x.id==id);if(o)o.s=s;if(s=='done')corders=corders.filter(x=>x.id!=id);
+ render();await send(true);
+}
+
+// --- uykuya/kilide karşı önlemler (garanti değil) ---
+async function keepAwake(){
+ try{wl=await navigator.wakeLock.request('screen');$('warn').hidden=true;wl.addEventListener('release',()=>setTimeout(keepAwake,1000))}
+ catch(e){$('warn').hidden=false;$('warn').textContent='⚠ Ekran otomatik açık tutulamıyor. Telefonun ekran zaman aşımını en uzun süreye alın.'}
+}
+function keepAlive(){
+ const go=()=>{try{if(!ac){ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();g.gain.value=.001;o.frequency.value=20;o.connect(g);g.connect(ac.destination);o.start()}if(ac.state=='suspended')ac.resume()}catch(e){}};
+ go();['touchstart','click'].forEach(ev=>document.addEventListener(ev,go,{passive:true}));
+}
+function heartbeat(){
+ try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(1),5000)'])));w.onmessage=()=>ctick()}
+ catch(e){setInterval(ctick,5000)}
+}
+</script></body></html>
